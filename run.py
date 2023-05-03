@@ -107,7 +107,7 @@ class Pipe:
 
         return emb
 
-    def embed_image(self, image1, image2):
+    def embed_image(self, image1, image2, ratio=0.5):
         dtype = next(self.image_encoder.parameters()).dtype
 
         if not isinstance(image1, torch.Tensor):
@@ -122,7 +122,7 @@ class Pipe:
         image2 = image2.to(device=torch_device, dtype=dtype)
         image2_embeds = self.image_encoder(image2).image_embeds
 
-        combo_pos = slerp(0.5, image1_embeds, image2_embeds)
+        combo_pos = slerp(ratio, image1_embeds, image2_embeds)
 
         image_embeds = self.prep_embeds(combo_pos, 0)
 
@@ -132,7 +132,7 @@ class Pipe:
         image_embeds = torch.cat([negative_prompt_embeds, image_embeds])
         return image_embeds
 
-    def __call__(self, content_image, style_image, num_inference_steps=50, guidance_scale=8):
+    def __call__(self, content_image, style_image, num_inference_steps=50, guidance_scale=8, ratio=0.5):
         style_embs = self.embed_image(content_image, style_image)
 
         prompt = ["character, 3d style, 8k, beautiful, digital painting, artstation, highly detailed, sharp focus"]
@@ -201,6 +201,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('content_url', type=str)
     parser.add_argument('style_url', type=str)
+    parser.add_argument('ratio', type=float, default=0.5)
 
     args = parser.parse_args()
 
@@ -208,6 +209,6 @@ if __name__ == "__main__":
     style_image = open_image(args.style_url)
 
     pipe = Pipe()
-    output = pipe(content_image, style_image)
+    output = pipe(content_image, style_image, args.ratio)
 
     output.save("output.png")
