@@ -133,7 +133,7 @@ class Pipe:
         return image_embeds
 
     def __call__(self, content_image, style_image, num_inference_steps=50, guidance_scale=8, ratio=0.5):
-        style_embs = self.embed_image(content_image, style_image)
+        style_embs = self.embed_image(content_image, style_image, ratio=ratio)
 
         prompt = ["character, 3d style, 8k, beautiful, digital painting, artstation, highly detailed, sharp focus"]
         neg_prompt = [
@@ -209,6 +209,6 @@ if __name__ == "__main__":
     style_image = open_image(args.style_url)
 
     pipe = Pipe()
-    output = pipe(content_image, style_image, args.ratio)
+    output = pipe(content_image, style_image, ratio=args.ratio)
 
     output.save("output.png")
